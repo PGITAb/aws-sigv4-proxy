@@ -1,4 +1,4 @@
-if: branch =~ ^master$|^staging$|^uat$|^development$|^release|^ci
+if: branch =~ ^master$|^staging$
 language: python
 group: stable
 dist: trusty
@@ -17,18 +17,6 @@ before_install: |-
     for env_value in $(compgen -v |grep '.*_STAGING$'); do
       eval export ${env_value%_STAGING}="${!env_value}"
     done
-  elif [ "uat" == "${TRAVIS_BRANCH}" ]; then
-    for env_value in $(compgen -v |grep '.*_UAT$'); do
-      eval export ${env_value%_UAT}="${!env_value}"
-    done
-  elif [[ "${TRAVIS_BRANCH}" =~ $RELEASE_REGEX ]]; then
-    for env_value in $(compgen -v |grep '.*_RELEASE$'); do
-      eval export ${env_value%_RELEASE}="${!env_value}"
-    done
-  else
-    for env_value in $(compgen -v |grep '.*_DEVELOPMENT$'); do
-      eval export ${env_value%_DEVELOPMENT}="${!env_value}"
-    done
   fi
 install: |-
   # install awscli for ecr upload
@@ -41,7 +29,7 @@ script: |-
   export ECR_LOGIN="aws ecr get-login --registry-ids $AWS_REGISTRY_ID --region $AWS_REGION --no-include-email"
   # build image
   export NAME=$AWS_ECR_NAME
-  docker build -t "$IMAGE" -t $IMAGE_LATEST
+  docker build -t "$IMAGE" -t $IMAGE_LATEST .
  
 deploy:
 # upload to ecr
